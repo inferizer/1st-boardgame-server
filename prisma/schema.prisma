@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model Users {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  password         String
+  firstName        String?           @map("first_name")
+  lastName         String?           @map("last_name")
+  mobile           String?
+  role             Role              @default(USER)
+  user_collections UserCollections[]
+  orders           Orders[]
+  addresses        Addresses[]
+
+  @@map("users")
+}
+
+model Addresses {
+  id          String @id @default(uuid())
+  line1       String
+  line2       String
+  province    String
+  district    String
+  subDistrict String @map("sub_district")
+  postcode    String
+  users       Users  @relation(fields: [usersId], references: [id])
+  usersId     String
+
+  @@map("addresses")
+}
+
+enum Status {
+  successfully
+  failed
+  pending
+}
+
+model Orders {
+  id          String       @id @default(uuid())
+  amount      Int
+  price       Int
+  trackNumber String?      @map("track_number")
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  payment     Status       @default(pending)
+  users       Users        @relation(fields: [usersId], references: [id])
+  usersId     String
+  orderItems  OrderItems[]
+
+  @@map("orders")
+}
+
+model OrderItems {
+  id        String   @id @default(uuid())
+  amount    Int
+  price     Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  order     Orders   @relation(fields: [ordersId], references: [id])
+  ordersId  String
+
+  @@map("order_items")
+}
+
+model Products {
+  id          String @id @default(uuid())
+  name        String
+  price       Int
+  stock       Int
+  discount    Float
+  description String
+
+  @@map("products")
+}
+
+model UserCollections {
+  id          String   @id @default(uuid())
+  addDate     DateTime @default(now()) @map("add_date")
+  userId      Users    @relation(fields: [usersId], references: [id])
+  boardgameID String
+  usersId     String
+
+  @@map("user_collections")
+}
