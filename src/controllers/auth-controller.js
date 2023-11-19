@@ -1,8 +1,9 @@
 const { registerSchema, loginSchema } = require("../validators/auth-validator");
-const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const prisma = require("../models/prisma");
 const createError = require("../utils/create-error");
+const deleteKeys = require("../utils/delete-keys");
+const createAccessToken = require("../utils/create-accesstoken");
 
 exports.register = async (req, res, next) => {
   try {
@@ -19,13 +20,11 @@ exports.register = async (req, res, next) => {
     const payload = {
       email: user.email,
     };
-    const SECRET = process.env.JWT_SECRET;
-    const EXP = process.env.JWT_EXP;
-    const accessToken = jwt.sign(payload, SECRET || "6546sajkhsajkdh", {
-      expiresIn: EXP,
-    });
+    const accessToken = createAccessToken(payload);
 
-    delete user.password;
+    let keysToDelete = ["password", "role"];
+    deleteKeys(user, keysToDelete);
+
     res.status(201).json({ accessToken, user });
   } catch (error) {
     return next(error);
@@ -56,15 +55,19 @@ exports.login = async (req, res, next) => {
     const payload = {
       email: user.email,
     };
-    const SECRET = process.env.JWT_SECRET;
-    const EXP = process.env.JWT_EXP;
-    const accessToken = jwt.sign(payload, SECRET || "6546sajkhsajkdh", {
-      expiresIn: EXP,
-    });
 
-    delete user.password;
+    const accessToken = createAccessToken(payload);
+
+    const keysToDelete = ["password", "firstName", "lastName", "mobile"];
+
+    deleteKeys(user, keysToDelete);
+
     res.status(201).json({ accessToken, user });
   } catch (error) {
     return next(error);
   }
+};
+
+exports.getMe = (req, res, next) => {
+  res.status(200).json({ user: req.user });
 };

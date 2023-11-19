@@ -13,7 +13,7 @@ enum Role {
 }
 
 model Users {
-  id               Int               @id @default(autoincrement())
+  id               String            @id @default(uuid())
   email            String            @unique
   password         String
   firstName        String?           @map("first_name")
@@ -35,7 +35,7 @@ enum Status {
 }
 
 model Orders {
-  id          Int          @id @default(autoincrement())
+  id          String       @id @default(uuid())
   amount      Int
   totalPrice  Int          @map("total_price")
   trackNumber String?      @map("track_number")
@@ -43,8 +43,8 @@ model Orders {
   updatedAt   DateTime     @updatedAt @map("updated_at")
   paymentPic  String?
   payment     Status       @default(pending)
-  user        Users        @relation(fields: [usersId], references: [id])
-  usersId     Int          @map("user_id")
+  users       Users        @relation(fields: [usersId], references: [id])
+  usersId     String       @map("user_id")
   orderItems  OrderItems[]
 
   @@map("orders")
@@ -57,7 +57,7 @@ model OrderItems {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   order     Orders   @relation(fields: [ordersId], references: [id])
-  ordersId  Int      @map("order_id")
+  ordersId  String   @map("order_id")
 
   @@map("order_items")
 }
@@ -72,7 +72,6 @@ model Products {
   price           Int?
   stock           Int?              @default(0)
   discount        Float?
-  isDelete        Boolean           @default(false)
   UserCollections UserCollections[]
   Cart            Cart[]
 
@@ -83,7 +82,7 @@ model UserCollections {
   id         Int      @id @default(autoincrement())
   userId     Users    @relation(fields: [usersId], references: [id])
   productId  Products @relation(fields: [productsId], references: [id])
-  usersId    Int      @map("user_id")
+  usersId    String   @map("user_id")
   productsId Int
 
   @@map("user_collections")
@@ -93,9 +92,8 @@ model Cart {
   id         Int      @id @default(autoincrement())
   userId     Users    @relation(fields: [usersId], references: [id])
   productId  Products @relation(fields: [productsId], references: [id])
-  usersId    Int      @map("user_id")
+  usersId    String   @map("user_id")
   productsId Int
-  quantity   Int
 
   @@map("cart")
 }
