@@ -1,3 +1,4 @@
+Not Finish
 -REGISTER
 POST /auth/register
 BODY email, password, confirmPassword
